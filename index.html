@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width,
+        initial-scale=1.0,
+        viewport-fit=cover,
+        user-scalable=no">
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <title>Analog Clock</title>
+
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #6f8791;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .clock {
+      position: relative;
+      width: min(88vw, 88vh);
+      height: min(88vw, 88vh);
+
+      background: white;
+      border: 9px solid black;
+      border-radius: 50%;
+
+      box-shadow:
+        inset 0 0 18px rgba(0,0,0,0.12),
+        0 2px 4px rgba(0,0,0,0.12);
+    }
+
+    .number {
+      position: absolute;
+      width: 52px;
+      height: 52px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-size: clamp(24px, 6vw, 46px);
+      font-weight: 500;
+      color: #000;
+
+      transform: translate(-50%, -50%);
+      z-index: 4;
+    }
+
+    .tick {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+
+      width: 7px;
+      height: 19px;
+
+      background: #aaa;
+      transform-origin: 50% calc(50% + 41%);
+      z-index: 2;
+    }
+
+    .hand {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+
+      transform-origin: 50% 100%;
+      transform: translate(-50%, -100%) rotate(0deg);
+
+      border-radius: 5px;
+      z-index: 6;
+    }
+
+    .hour {
+      width: 16px;
+      height: 28%;
+      background: black;
+    }
+
+    .minute {
+      width: 10px;
+      height: 40%;
+      background: black;
+    }
+
+    .second {
+      width: 3px;
+      height: 42%;
+      background: #ef5555;
+      z-index: 7;
+    }
+
+    .center-dot {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+
+      width: 34px;
+      height: 34px;
+
+      background: black;
+      border-radius: 50%;
+
+      transform: translate(-50%, -50%);
+      z-index: 8;
+    }
+
+    .center-dot::after {
+      content: "";
+      position: absolute;
+
+      left: 50%;
+      top: 50%;
+
+      width: 20px;
+      height: 20px;
+
+      background: #d63d45;
+      border-radius: 50%;
+
+      transform: translate(-50%, -50%);
+    }
+
+    #ampm {
+      position: absolute;
+      left: 50%;
+      top: 63%;
+
+      transform: translate(-50%, -50%);
+
+      font-size: clamp(24px, 6vw, 40px);
+      font-weight: bold;
+      color: black;
+
+      z-index: 5;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="clock" id="clock">
+
+  <div class="hand hour" id="hour"></div>
+  <div class="hand minute" id="minute"></div>
+  <div class="hand second" id="second"></div>
+
+  <div class="center-dot"></div>
+
+  <div id="ampm">AM</div>
+
+</div>
+
+<script>
+
+const clock = document.getElementById("clock");
+
+// 숫자 생성
+for (let i = 1; i <= 12; i++) {
+
+  const number = document.createElement("div");
+  number.className = "number";
+  number.innerText = i;
+
+  const angle = i * 30 * Math.PI / 180;
+
+  const radius = 39;
+
+  const x = 50 + radius * Math.sin(angle);
+  const y = 50 - radius * Math.cos(angle);
+
+  number.style.left = x + "%";
+  number.style.top = y + "%";
+
+  clock.appendChild(number);
+}
+
+
+// 시간 눈금 생성
+for (let i = 0; i < 12; i++) {
+
+  const tick = document.createElement("div");
+
+  tick.className = "tick";
+
+  tick.style.transform =
+    `translate(-50%, -50%) rotate(${i * 30}deg)
+     translateY(-41%)`;
+
+  clock.appendChild(tick);
+}
+
+
+function updateClock() {
+
+  const now = new Date();
+
+  const hour = now.getHours();
+  const minute = now.getMinutes();
+  const second = now.getSeconds();
+  const ms = now.getMilliseconds();
+
+
+  // 부드러운 초침
+  const secondDeg =
+    (second + ms / 1000) * 6;
+
+
+  const minuteDeg =
+    (minute + second / 60) * 6;
+
+
+  const hourDeg =
+    ((hour % 12) + minute / 60) * 30;
+
+
+  document.getElementById("second").style.transform =
+    `translate(-50%, -100%) rotate(${secondDeg}deg)`;
+
+
+  document.getElementById("minute").style.transform =
+    `translate(-50%, -100%) rotate(${minuteDeg}deg)`;
+
+
+  document.getElementById("hour").style.transform =
+    `translate(-50%, -100%) rotate(${hourDeg}deg)`;
+
+
+  document.getElementById("ampm").innerText =
+    hour >= 12 ? "PM" : "AM";
+
+
+  requestAnimationFrame(updateClock);
+}
+
+updateClock();
+
+</script>
+
+</body>
+</html>
